@@ -1,18 +1,28 @@
 /** Customer for Lunchly */
 
-const db = require("../db");
-const Reservation = require("./reservation");
-
+const db = require('../db');
+const Reservation = require('./reservation');
 
 /** Customer of the restaurant. */
 
 class Customer {
-  constructor({id, firstName, lastName, phone, notes}) {
+  constructor({ id, firstName, lastName, phone, notes }) {
     this.id = id;
     this.firstName = firstName;
     this.lastName = lastName;
     this.phone = phone;
     this.notes = notes;
+    this.fullName = `${firstName} ${lastName}`;
+  }
+
+  /** methods for getting/setting notes (keep as empty string, not NULL) */
+
+  set fullName(val) {
+    this._fullName = val || '';
+  }
+
+  get fullName() {
+    return this._fullName;
   }
 
   /** methods for getting/setting notes (keep as empty string, not NULL) */
@@ -39,7 +49,7 @@ class Customer {
 
   static async all() {
     const results = await db.query(
-          `SELECT id, 
+      `SELECT id, 
          first_name AS "firstName",  
          last_name AS "lastName", 
          phone, 
@@ -54,13 +64,13 @@ class Customer {
 
   static async get(id) {
     const results = await db.query(
-          `SELECT id, 
+      `SELECT id, 
          first_name AS "firstName",  
          last_name AS "lastName", 
          phone, 
          notes 
         FROM customers WHERE id = $1`,
-        [id]
+      [id]
     );
 
     const customer = results.rows[0];
@@ -85,19 +95,20 @@ class Customer {
   async save() {
     if (this.id === undefined) {
       const result = await db.query(
-            `INSERT INTO customers (first_name, last_name, phone, notes)
+        `INSERT INTO customers (first_name, last_name, phone, notes)
              VALUES ($1, $2, $3, $4)
              RETURNING id`,
-          [this.firstName, this.lastName, this.phone, this.notes]);
+        [this.firstName, this.lastName, this.phone, this.notes]
+      );
       this.id = result.rows[0].id;
     } else {
       await db.query(
-            `UPDATE customers SET first_name=$1, last_name=$2, phone=$3, notes=$4)
+        `UPDATE customers SET first_name=$1, last_name=$2, phone=$3, notes=$4)
              WHERE id=$5`,
-          [this.firstName, this.lastName, this.phone, this.notes, this.id]);
+        [this.firstName, this.lastName, this.phone, this.notes, this.id]
+      );
     }
   }
 }
-
 
 module.exports = Customer;
