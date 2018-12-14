@@ -8,7 +8,7 @@
 
 <ul style="column-count: 4">
   {% for customer in customers %}
-  <li><a href="/{{ customer.id }}/">{{ customer.fullName }}</a></li>
+  <li><a href="/{{ customer.id }}/">{{ customer.fullName }}{%if customer.count%} ({{customer.count}}){% endif %}</a></li>
   {% endfor %}
 </ul>
 

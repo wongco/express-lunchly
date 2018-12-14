@@ -18,7 +18,7 @@ class Customer {
   /** methods for getting/setting notes (keep as empty string, not NULL) */
 
   set fullName(val) {
-    this._fullName = val || '';
+    this._fullName = val || ``;
   }
 
   get fullName() {
@@ -61,6 +61,42 @@ class Customer {
   }
 
   /** get a customer by ID. */
+
+  static async getByName(name) {
+    // The string has to be prepared before use in Prepared Statement
+    let queryTerm = `%${name}%`;
+    const results = await db.query(
+      `SELECT id, 
+      first_name AS "firstName",  
+      last_name AS "lastName", 
+      phone, 
+      notes FROM customers WHERE (first_name ILIKE $1 OR last_name ILIKE $1)`,
+      [queryTerm]
+    );
+    return results.rows.map(item => new Customer(item));
+  }
+
+  static async getTop10() {
+    let results = await db.query(
+      `SELECT c.id, 
+         c.first_name AS "firstName",  
+         c.last_name AS "lastName", 
+         c.phone, 
+         c.notes,
+         COUNT(r.id) AS "count"
+       FROM customers AS c
+       JOIN reservations AS r
+        ON r.customer_id = c.id
+       GROUP BY c.id
+        ORDER BY count(r.id) DESC
+       LIMIT 10`
+    );
+    return results.rows.map(item => {
+      let customer = new Customer(item);
+      customer.count = item.count;
+      return customer;
+    });
+  }
 
   static async get(id) {
     const results = await db.query(
