@@ -83,6 +83,8 @@ class Reservation {
     return results.rows.map(row => new Reservation(row));
   }
 
+  /** given a reservation id, find the reservation. */
+
   static async getReservationById(id) {
     const row = db.query(`SELECT * FROM reservations WHERE id=$1`, [id])[0];
     let reservation = new Reservation({
@@ -95,40 +97,24 @@ class Reservation {
     return reservation;
   }
 
+  /** save this reservation. */
+
   async save() {
+    let result;
     if (this.id === undefined) {
-      var result = (await db.query(
+      result = (await db.query(
         `INSERT INTO reservations (customer_id, start_at, num_guests, notes)
         VALUES ($1, $2, $3, $4) RETURNING *`,
         [this.customerId, this.startAt, this.numGuests, this.notes]
       )).rows[0];
       this.id = result.id;
     } else {
-      var result = (await db.query(
+      result = (await db.query(
         `UPDATE reservation SET customer_id=$1, start_at=$2, num_guests=$3, notes=$4 WHERE id=$5 RETURNING *`,
         [this.customerId, this.startAt, this.numGuests, this.notes, this.id]
       )).rows[0];
     }
-    // return new Reservation(result);
   }
 }
-
-// async save() {
-//   if (this.id === undefined) {
-//     const result = await db.query(
-//       `INSERT INTO customers (first_name, last_name, phone, notes)
-//            VALUES ($1, $2, $3, $4)
-//            RETURNING id`,
-//       [this.firstName, this.lastName, this.phone, this.notes]
-//     );
-//     this.id = result.rows[0].id;
-//   } else {
-//     await db.query(
-//       `UPDATE customers SET first_name=$1, last_name=$2, phone=$3, notes=$4)
-//            WHERE id=$5`,
-//       [this.firstName, this.lastName, this.phone, this.notes, this.id]
-//     );
-//   }
-// }
 
 module.exports = Reservation;
