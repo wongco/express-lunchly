@@ -39,10 +39,7 @@ router.get('/add/', async function(req, res, next) {
 /** Handle adding a new customer. */
 router.post('/add/', async function(req, res, next) {
   try {
-    const firstName = req.body.firstName;
-    const lastName = req.body.lastName;
-    const phone = req.body.phone;
-    const notes = req.body.notes;
+    const { firstName, lastName, phone, notes } = req.body;
 
     const customer = new Customer({ firstName, lastName, phone, notes });
     await customer.save();
@@ -80,10 +77,7 @@ router.get('/:id/edit/', async function(req, res, next) {
 /** Handle editing a customer. */
 router.post('/:id/edit/', async function(req, res, next) {
   try {
-    const firstName = req.body.firstName;
-    const lastName = req.body.lastName;
-    const phone = req.body.phone;
-    const notes = req.body.notes;
+    const { firstName, lastName, phone, notes } = req.body;
 
     const customer = new Customer({ firstName, lastName, phone, notes });
     await customer.save();
@@ -97,10 +91,8 @@ router.post('/:id/edit/', async function(req, res, next) {
 /** Handle adding a new reservation. */
 router.post('/:id/add-reservation/', async function(req, res, next) {
   try {
-    const customerId = req.params.id;
+    const { customerId, numGuests, notes } = req.params;
     const startAt = new Date(req.body.startAt);
-    const numGuests = req.body.numGuests;
-    const notes = req.body.notes;
 
     const reservation = new Reservation({
       customerId,

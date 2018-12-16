@@ -76,8 +76,10 @@ class Customer {
     return results.rows.map(item => new Customer(item));
   }
 
+  /** find top10 customers */
+
   static async getTop10() {
-    let results = await db.query(
+    let result = await db.query(
       `SELECT c.id, 
          c.first_name AS "firstName",  
          c.last_name AS "lastName", 
@@ -91,12 +93,14 @@ class Customer {
         ORDER BY count(r.id) DESC
        LIMIT 10`
     );
-    return results.rows.map(item => {
+    return result.rows.map(item => {
       let customer = new Customer(item);
       customer.count = item.count;
       return customer;
     });
   }
+
+  /** get specific customer */
 
   static async get(id) {
     const results = await db.query(

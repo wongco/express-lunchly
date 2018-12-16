@@ -8,23 +8,23 @@ const db = require('../db');
 
 class Reservation {
   constructor({ id, customerId, numGuests, startAt, notes }) {
-    // arguments 0 is for the case where we passed in snake_case SQL result object
     this.id = id;
-    this.customerId = customerId; // || arguments[0].customer_id;
-    this.numGuests = numGuests; // || arguments[0].num_guests;
-    this.startAt = startAt; // || arguments[0].start_at;
+    this.customerId = customerId;
+    this.numGuests = numGuests;
+    this.startAt = startAt;
     this.notes = notes;
   }
 
   /** methods for setting/getting startAt time */
 
   set numGuests(val) {
-    if (typeof val !== 'number' || val < 1) {
-      this._numGuests = 1;
-    } else {
-      this._numGuests = val;
-    }
-    return this._numGuests;
+    this._numGuests = typeof val !== 'number' || val < 1 ? 1 : val;
+    // if (typeof val !== 'number' || val < 1) {
+    //   this._numGuests = 1;
+    // } else {
+    //   this._numGuests = val;
+    // }
+    // return this._numGuests;
   }
 
   get numGuests() {
@@ -86,15 +86,33 @@ class Reservation {
   /** given a reservation id, find the reservation. */
 
   static async getReservationById(id) {
-    const row = db.query(`SELECT * FROM reservations WHERE id=$1`, [id])[0];
-    let reservation = new Reservation({
-      id: row.id,
-      customerId: row.customer_id,
-      startAt: row.start_at,
-      numGuests: row.num_guests,
-      notes: row.notes
-    });
-    return reservation;
+    // const row = db.query(`SELECT * FROM reservations WHERE id=$1`, [id])[0];
+    // let reservation = new Reservation({
+    //   id: row.id,
+    //   customerId: row.customer_id,
+    //   startAt: row.start_at,
+    //   numGuests: row.num_guests,
+    //   notes: row.notes
+    // });
+    // return reservation;
+    const reservation = await db.query(
+      `SELECT id,
+           customer_id as "customerId",
+           start_at as "startAt",
+           num_guests as "numGuests",
+           notes
+         FROM reservations
+         WHERE id=$1`,
+      [id]
+    )[0];
+
+    if (reservation === undefined) {
+      const err = new Error(`No such reservation: ${id}`);
+      err.status = 404;
+      throw err;
+    }
+
+    return new Reservation(reservation);
   }
 
   /** save this reservation. */
